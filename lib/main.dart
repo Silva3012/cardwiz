@@ -1,5 +1,8 @@
 // Flutter Material package
+import 'package:cardwiz/user_credit_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'fomart_input.dart';
 
 // Starting point of the app
 void main() => runApp(const MyApp());
@@ -32,9 +35,12 @@ class MyApp extends StatelessWidget {
   }
 }
 
+var _creditCard = UserCreditCard();
+
 // CreditCardDetailsForm will be a StatefulWidget, so that it can maintain state
 class CreditCardDetailsForm extends StatefulWidget {
   const CreditCardDetailsForm({super.key});
+
   @override
   State<CreditCardDetailsForm> createState() => _CreditCardDetailsFormState();
 }
@@ -54,32 +60,56 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
           // TextFormField for the Card Number input.
           TextFormField(
             decoration: const InputDecoration(
-              hintText: 'Card Number'
+              labelText: "Name on the Card",
+              hintText: "Name",
             ),
-            keyboardType: TextInputType.number,
+            // Save users input in an object
+            onSaved: (String? value) {
+              _creditCard.name = value;
+            },
+            keyboardType: TextInputType.text,
             validator: (String? value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your card number';
+                return "Please enter the name on the Card";
               }
               return null;
             },
           ),
+          // TextFormField for the Card Number input.
           TextFormField(
             decoration: const InputDecoration(
-                hintText: 'CVV'
+                labelText: "Card Number",
+                hintText: "Enter you card number",
+            ),
+            inputFormatters: [
+              // FilteringTextInputFormatter.digitsOnly,
+              // LengthLimitingTextInputFormatter(19),
+              CreditCardNumberFormatter(
+                sample: "xxxx-xxxx-xxxx-xxxx",
+                separator: "-",
+              )
+            ],
+            keyboardType: TextInputType.number,
+            // onSaved: (String? value) {
+            //   print("onSaved = $value");
+            //   print("Num controller has = ${numberController.text}");
+            //   _creditCard.number;
+            // },
+            validator: validateCardNumber,
+          ),
+          TextFormField(
+            decoration: const InputDecoration(
+                labelText: "CVV",
+                hintText: "CVV",
             ),
             keyboardType: TextInputType.number,
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your CVV';
-              }
-              return null;
-            },
+            validator: validateCVV,
           ),
           // TODO: Issuing country will change to a dropdown of pre-populated countries
           TextFormField(
             decoration: const InputDecoration(
-                hintText: 'Issuing Country'
+                labelText: "Country",
+                hintText: "Issuing Country",
             ),
             keyboardType: TextInputType.number,
             validator: (String? value) {
@@ -91,12 +121,13 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
           ),
           TextFormField(
             decoration: const InputDecoration(
-                hintText: 'Expiry Date'
+                labelText: "Expiry Date",
+                hintText: "MM/YY",
             ),
             keyboardType: TextInputType.number,
             validator: (String? value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your Expiry date';
+                return "Please enter the Expiry date";
               }
               return null;
             },
@@ -124,9 +155,14 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
 
 }
 
-// Reference for the card details implementation: https://api.flutter.dev/flutter/widgets/Form-class.html
+
 
 /*
+About payment card numbers: https://en.wikipedia.org/wiki/Payment_card_number
+
+Reference for the card details implementation: https://api.flutter.dev/flutter/widgets/Form-class.html
+
 Some styling references
 EdgeInsets: https://api.flutter.dev/flutter/painting/EdgeInsets-class.html
+
  */
