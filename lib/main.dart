@@ -57,7 +57,7 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // TextFormField for the Card Number input.
+          // TextFormField for the Card Name input.
           TextFormField(
             decoration: const InputDecoration(
               labelText: "Name on the Card",
@@ -82,21 +82,21 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
                 hintText: "Enter you card number",
             ),
             inputFormatters: [
-              // FilteringTextInputFormatter.digitsOnly,
-              // LengthLimitingTextInputFormatter(19),
               CreditCardNumberFormatter(
                 sample: "xxxx-xxxx-xxxx-xxxx",
                 separator: "-",
               )
             ],
             keyboardType: TextInputType.number,
-            // onSaved: (String? value) {
-            //   print("onSaved = $value");
-            //   print("Num controller has = ${numberController.text}");
-            //   _creditCard.number;
-            // },
+            onSaved: (String? value) {
+              print("onSaved = $value");
+              var numberController = TextEditingController();
+              print("Num controller has = ${numberController.text}");
+              _creditCard.number;
+            },
             validator: validateCardNumber,
           ),
+          // TextFormField for the CVV.
           TextFormField(
             decoration: const InputDecoration(
                 labelText: "CVV",
@@ -105,6 +105,7 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
             keyboardType: TextInputType.number,
             validator: validateCVV,
           ),
+          // TextFormField for the Issuing country.
           // TODO: Issuing country will change to a dropdown of pre-populated countries
           TextFormField(
             decoration: const InputDecoration(
@@ -119,11 +120,17 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
               return null;
             },
           ),
+          // TextFormField for the Expiry Date.
           TextFormField(
             decoration: const InputDecoration(
                 labelText: "Expiry Date",
                 hintText: "MM/YY",
             ),
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(4),
+              CardDateFormatter()
+            ],
             keyboardType: TextInputType.number,
             validator: (String? value) {
               if (value == null || value.isEmpty) {
@@ -131,6 +138,11 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
               }
               return null;
             },
+            // onSaved: (value) {
+            //   List<int> expiryDate = cardExpiryDate(value!);
+            //   _creditCard.month = expiryDate[0];
+            //   _creditCard.month = expiryDate[1];
+            // },
           ),
           // Padding the submit button
           Padding(
