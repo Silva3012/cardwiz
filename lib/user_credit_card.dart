@@ -5,7 +5,7 @@ enum CardType {
   Visa,
   Maestro,
   Mastercard,
-  Others, // For other cards
+  Others,
   Invalid // For invalid card
 }
 
@@ -76,6 +76,93 @@ String? validateCVV(String? value) {
   return null; // Return null if CVV is valid
 }
 
+// Function to validate the expiry date
+String? validateExpiryDate(String? value) {
+  if (value == null || value.isEmpty) {
+    return "Please enter the Expiry date";
+  }
+
+  int year;
+  int month;
+
+  // The value should contain a forward slash if the month and year has been entered
+  if (value.contains(RegExp(r'(/)'))) {
+    var splitValue = value.split(RegExp(r'(/)'));
+
+    // The value before the slash is the month and the value after the slash is the year
+    month = int.parse(splitValue[0]);
+    year = int.parse(splitValue[1]);
+  } else {
+    // Only month was entered
+    month = int.parse(value.substring(0, (value.length)));
+    year = -1;
+  }
+
+  if ((month < 1) || (month > 12)) {
+    // Valid month is between 1 and 12 (Jan and Dec respectively)
+    return "Invalid expiry month";
+  }
+
+  var fourDigitsYear = yearToFourDigits(year);
+
+  if ((fourDigitsYear < 1) || (fourDigitsYear > 2099)) {
+    // A valid year should be between 1 and 2099
+    return "Invalid expiry year";
+  }
+
+  if (!isDateExpired(month, year)) {
+    return "The card has expired";
+  }
+  return null;
+}
+
+// Function to convert two-digit year to four-digit if necessary
+int yearToFourDigits(int year) {
+  if (year < 100 && year >= 0) {
+    final now = DateTime.now();
+    final currentYear = now.year.toString();
+    final prefix = currentYear.substring(0, currentYear.length - 2);
+    year = int.parse('$prefix${year.toString().padLeft(2, '0')}');
+  }
+  return year;
+}
+
+// isDateExpired function
+bool isDateExpired(int month, int year) {
+  return isDateNotExpired(year, month);
+}
+
+// isDateNotExpired function
+// Not expired if both year and month has not passed
+bool isDateNotExpired(int year, int month) {
+  return !isYearPassed(year) && !isMonthPassed(year, month);
+}
+
+// isYearPassed function
+// Year has passed if the current year is more that the card year
+bool isYearPassed(int year) {
+  int fourDigitsYear = yearToFourDigits(year);
+  final now = DateTime.now();
+  return fourDigitsYear < now.year;
+}
+
+// isMonthPassed function
+// Month passed if year is in the past and also card month is more than current month
+bool isMonthPassed(int year, int month) {
+  final now = DateTime.now();
+  return isYearPassed(year) || yearToFourDigits(year) == now.year && (month < now.month + 1);
+}
+
+/*
+getCardExpiryDate by splitting the date and using index 0 of the split as the month
+and index 1 as the year
+ */
+List<int> getCardExpiryDate(String value) {
+  final split = value.split(RegExp(r'(/)'));
+  return [int.parse(split[0]), int.parse(split[1])];
+}
+
+
 // Function that removes any non-digit characters with regex
 String cleanedNumber(String text) {
   // Match any character that is not a digit
@@ -87,6 +174,30 @@ String cleanedNumber(String text) {
 
 
 
+
+CardType getCreditCardTypeFromNumbers(String numbers) {
+  CardType cardType;
+  if(numbers.startsWith(RegExp(r'4'))) {
+    cardType = CardType.Visa;
+    print(cardType);
+  } else if (numbers.startsWith(RegExp(r'(5018|5020|5038|5893|6304|6759|6761|6762|6763)'))){
+    cardType = CardType.Maestro;
+    print(cardType);
+  } else if (numbers.startsWith(r'((5[1-5])|(222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720))')){
+    cardType = CardType.Mastercard;
+    print(cardType);
+  } else if (numbers.length <= 8) {
+    cardType = CardType.Others;
+    print(cardType);
+  } else {
+    cardType = CardType.Invalid;
+    print(cardType);
+  }
+  return cardType;
+}
+
+
+
 /*
 Reference for this project: https://medium.com/flutter-community/validating-and-formatting-payment-card-text-fields-in-flutter-bebe12bc9c60
 Classes ref: https://dart.dev/language/classes
@@ -94,5 +205,16 @@ Constructor ref: https://dart.dev/language/constructors
 Enums ref: https://dart.dev/language/enums
 Luhn Algorithm: https://www.geeksforgeeks.org/luhn-algorithm/ and https://www.youtube.com/watch?v=PNXXqzU4YnM
 Regex: https://www3.ntu.edu.sg/home/ehchua/programming/howto/Regexe.html
-Regex: https://dart.dev/tools/linter-rules/valid_regexps
+Regex:
+https://dart.dev/tools/linter-rules/valid_regexps
+https://www.regular-expressions.info/creditcard.html
+https://regex101.com/library/uW8mC3?filterFlavors=java&orderBy=MOST_RECENT&page=3&search=
+
+DateTime class: https://api.flutter.dev/flutter/dart-core/DateTime-class.html
+
+Card Types by numbers:
+https://en.wikipedia.org/wiki/Payment_card_number#cite_note-mastercard-rules-16
+
+startsWith method
+https://api.flutter.dev/flutter/dart-core/String/startsWith.html
  */

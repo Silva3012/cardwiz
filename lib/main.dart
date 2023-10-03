@@ -1,8 +1,10 @@
-// Flutter Material package
-import 'package:cardwiz/user_credit_card.dart';
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'fomart_input.dart';
+import 'package:cardwiz/user_credit_card.dart';
 
 // Starting point of the app
 void main() => runApp(const MyApp());
@@ -16,7 +18,7 @@ class MyApp extends StatelessWidget {
     // Base widget of the app
     return MaterialApp(
       title: "CardWiz",
-      debugShowCheckedModeBanner: false,
+      // debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark
       ),
@@ -35,7 +37,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-var _creditCard = UserCreditCard();
+
 
 // CreditCardDetailsForm will be a StatefulWidget, so that it can maintain state
 class CreditCardDetailsForm extends StatefulWidget {
@@ -48,12 +50,23 @@ class CreditCardDetailsForm extends StatefulWidget {
 // The state of CreditCardDetailsForm is _CreditCardDetailsFormState
 class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
   final _formKey = GlobalKey<FormState>();
+  final _creditCard = UserCreditCard();
+  var numberController = TextEditingController();
+  var _autoValidateMode = AutovalidateMode.disabled;
+
+  // Initialize the controller and pass a function
+  void initialState() {
+    super.initState();
+    _creditCard.type = CardType.Others;
+    numberController.addListener(_getCreditCardTypeFromNumbers);
+  }
 
   @override
   Widget build(BuildContext context) {
     // Form widget that creates a form
     return Form(
       key: _formKey,
+      autovalidateMode: _autoValidateMode,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -87,14 +100,15 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
                 separator: "-",
               )
             ],
+            controller: numberController,
+            validator: validateCardNumber,
             keyboardType: TextInputType.number,
             onSaved: (String? value) {
               print("onSaved = $value");
-              var numberController = TextEditingController();
               print("Num controller has = ${numberController.text}");
-              _creditCard.number;
+              _creditCard.number = cleanedNumber(value!);
             },
-            validator: validateCardNumber,
+
           ),
           // TextFormField for the CVV.
           TextFormField(
@@ -104,6 +118,9 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
             ),
             keyboardType: TextInputType.number,
             validator: validateCVV,
+              onSaved: (value) {
+                _creditCard.cvv = int.parse(value!);
+              }
           ),
           // TextFormField for the Issuing country.
           // TODO: Issuing country will change to a dropdown of pre-populated countries
@@ -132,38 +149,76 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
               CardDateFormatter()
             ],
             keyboardType: TextInputType.number,
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return "Please enter the Expiry date";
-              }
-              return null;
+            validator: validateExpiryDate,
+            onSaved: (value) {
+              List<int> expiryDate = getCardExpiryDate(value!);
+              _creditCard.month = expiryDate[0];
+              _creditCard.year = expiryDate[1];
             },
-            // onSaved: (value) {
-            //   List<int> expiryDate = cardExpiryDate(value!);
-            //   _creditCard.month = expiryDate[0];
-            //   _creditCard.month = expiryDate[1];
-            // },
           ),
-          // Padding the submit button
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15.0),
-            child: ElevatedButton(
-              onPressed: () {
-                // Validate will return true if the form is valid, or false if
-                // the form is invalid.
-                if(_formKey.currentState!.validate()) {
-                  //If the form is valid, show a Snackbar
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Successfully validated")));
-                }
-              },
-              child: const Text("Submit")
-            )
+          // Validate Button
+          Container(
+            alignment: Alignment.center,
+            child: _submitButton(),
           )
         ],
       )
     );
   }
 
+  @override
+  // Clean up the controller once Widget is removed from the Widget tree
+  void dispose() {
+    numberController.removeListener(_getCreditCardTypeFromNumbers);
+    numberController.dispose();
+    super.dispose();
+  }
+
+  // This function uses getCreditCardTypeFromNumbers to determine the card issuer from the number already entered
+  void _getCreditCardTypeFromNumbers() {
+    String numbers = cleanedNumber(numberController.text);
+    CardType cardType = getCreditCardTypeFromNumbers(numbers);
+    setState(() {
+      _creditCard.type = cardType;
+    });
+  }
+
+  // This function will be called when the submit button has been pressed to validate inputs
+  void _validateCardInformation() {
+    final FormState form = _formKey.currentState!;
+    if (!form.validate()) {
+      setState(() {
+        _autoValidateMode = AutovalidateMode.always; // Validate on every change
+      });
+      _showSnackBar("Please fix the errors in red before submitting.");
+
+    } else {
+      form.save();
+      // TODO on local storage
+      _showSnackBar("Credit has been validated");
+      // Log the credit card class
+      print("Credit Card Details: $_creditCard");
+    }
+  }
+
+  void _showSnackBar(String value) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(value),
+      duration: const Duration(seconds: 3),
+    ));
+  }
+
+  Widget _submitButton() {
+    if (Platform.isIOS) {
+      return CupertinoButton(
+          onPressed: _validateCardInformation,
+          child: const Text("Validate"));
+    } else {
+      return ElevatedButton(
+          onPressed: _validateCardInformation,
+          child: const Text("Validate"));
+    }
+  }
 
 }
 
@@ -176,5 +231,11 @@ Reference for the card details implementation: https://api.flutter.dev/flutter/w
 
 Some styling references
 EdgeInsets: https://api.flutter.dev/flutter/painting/EdgeInsets-class.html
+
+Why do we use the dispose method
+https://stackoverflow.com/questions/59558604/why-do-we-use-the-dispose-method-in-flutter-dart-code
+
+Platform class
+https://api.flutter.dev/flutter/package-platform_platform/Platform-class.html
 
  */
