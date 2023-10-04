@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 // Enumeration of the card types we want to support
 enum CardType {

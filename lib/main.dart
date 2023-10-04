@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'fomart_input.dart';
 import 'package:cardwiz/user_credit_card.dart';
+import 'package:http/http.dart' as http;
 
 // Starting point of the app
 void main() => runApp(const MyApp());
@@ -37,7 +39,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// Class to represent country data
+class Country {
+  final String name;
+  final String code;
 
+  Country({required this.name, required this.code});
+}
 
 // CreditCardDetailsForm will be a StatefulWidget, so that it can maintain state
 class CreditCardDetailsForm extends StatefulWidget {
@@ -54,11 +62,19 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
   var numberController = TextEditingController();
   var _autoValidateMode = AutovalidateMode.disabled;
 
+  // Issuing country
+  List<Country>  countries = [];
+  String selectedCountry = "";
+
+
+
   // Initialize the controller and pass a function
   void initialState() {
     super.initState();
+    fetchCountries();
     _creditCard.type = CardType.Others;
     numberController.addListener(_getCreditCardTypeFromNumbers);
+
   }
 
   @override
@@ -122,21 +138,32 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
                 _creditCard.cvv = int.parse(value!);
               }
           ),
-          // TextFormField for the Issuing country.
-          // TODO: Issuing country will change to a dropdown of pre-populated countries
-          TextFormField(
-            decoration: const InputDecoration(
-                labelText: "Country",
-                hintText: "Issuing Country",
-            ),
-            keyboardType: TextInputType.number,
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your issuing country';
-              }
-              return null;
+          // TODO: Issuing country will change to a dropdown of pre-populated countries from an API
+          DropdownButtonFormField<String>(
+            value: selectedCountry,
+            onChanged: (value) {
+              setState(() {
+                selectedCountry = value!;
+              });
             },
+            items: countries.map((Country country) {
+              return DropdownMenuItem<String>(
+                value: country.code,
+                child: Text(country.name),
+              );
+            }).toList(),
+            decoration: const InputDecoration(
+              labelText: "Country",
+              hintText: "Select Country",
+            ),
+            // validator: (String? value) {
+            //   if (value == null || value.isEmpty) {
+            //     return "Please select your country";
+            //   }
+            //   return null;
+            // },
           ),
+
           // TextFormField for the Expiry Date.
           TextFormField(
             decoration: const InputDecoration(
@@ -188,7 +215,7 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
     final FormState form = _formKey.currentState!;
     if (!form.validate()) {
       setState(() {
-        _autoValidateMode = AutovalidateMode.always; // Validate on every change
+        // _autoValidateMode = AutovalidateMode.always; // Validate on every change
       });
       _showSnackBar("Please fix the errors in red before submitting.");
 
@@ -207,6 +234,31 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
       duration: const Duration(seconds: 3),
     ));
   }
+
+  // Fetch countries function
+  void fetchCountries() async {
+    const String apiUrl = "https://restcountries.com/v3.1/all";
+
+    final response = await http.get(apiUrl as Uri);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      final List<Country> fetchedCountries = data.map((item) {
+        return Country(
+          name: item['name']['common'],
+          code: item['cca2'],
+        );
+      }).toList();
+
+      setState(() {
+        countries = fetchedCountries;
+      });
+      print("Fetched countries: ${countries.map((country) => country.name).join(', ')}");
+    } else {
+      print("HTTP Error: ${response.statusCode}");
+    }
+  }
+
 
   Widget _submitButton() {
     if (Platform.isIOS) {
@@ -238,4 +290,6 @@ https://stackoverflow.com/questions/59558604/why-do-we-use-the-dispose-method-in
 Platform class
 https://api.flutter.dev/flutter/package-platform_platform/Platform-class.html
 
+API and dropdown
+https://medium.com/@dc.vishwakarma.raj/bind-your-api-to-dropdown-in-flutter-bf7339deeb2
  */
