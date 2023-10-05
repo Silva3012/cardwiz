@@ -1,53 +1,10 @@
 import 'dart:io';
-
-import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'fomart_input.dart';
 import 'package:cardwiz/user_credit_card.dart';
-import 'package:http/http.dart' as http;
-
-// Network request
-Future<List<Country>> fetchCountries() async {
-  final response = await http.get(Uri.parse("https://restcountries.com/v3.1/all"));
-
-  print('Status code: ${response.statusCode}');
-
-  if (response.statusCode == 200) {
-    final List<dynamic> jsonData = jsonDecode(response.body);
-
-    // List of Country objects
-    final List<Country> countries = jsonData.map((json) {
-      return Country(
-        name: json['name']['common'],
-        code: json["cca2"],
-      );
-    }).toList();
-
-    // Sort countries alphabetically
-    countries.sort((a, b) => a.name.compareTo(b.name));
-
-    print("Fetched countries: ${countries.map((country) => country.name).join(', ')}"); // Print the fetched data
-    return countries;
-  } else {
-    throw Exception('Failed to load countries');
-  }
-}
-// Class to represent country data
-class Country {
-  final String name;
-  final String code;
-
-  const Country({required this.name, required this.code});
-
-  factory Country.fromJson(Map<String, dynamic> json) {
-    return Country(
-      name: json['name'],
-      code: json['cca2'],
-    );
-  }
-}
+import 'countries.dart';
 
 // Starting point of the app
 void main() => runApp(const MyApp());
@@ -69,6 +26,14 @@ class MyApp extends StatelessWidget {
         // Add the app bar at the top
         appBar: AppBar(
           title: const Text("Card Wiz"),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.list),
+              onPressed: () {
+                // TODO: navigate to a page to configure banned countries (call a function)
+              },
+            ),
+          ],
         ),
         // We will add some padding on the body of the Scaffold widget
         body: const Padding(
@@ -79,8 +44,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
 
 // CreditCardDetailsForm will be a StatefulWidget, so that it can maintain state
 class CreditCardDetailsForm extends StatefulWidget {
@@ -308,10 +271,8 @@ https://api.flutter.dev/flutter/package-platform_platform/Platform-class.html
 Sorting
 https://stackoverflow.com/questions/49675055/sort-list-by-alphabetical-order
 
-API and dropdown
-https://docs.flutter.dev/cookbook/networking/fetch-data
+Dropdown
 https://medium.com/@dc.vishwakarma.raj/bind-your-api-to-dropdown-in-flutter-bf7339deeb2
 https://api.flutter.dev/flutter/material/DropdownButton-class.html
 https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html
-
  */
