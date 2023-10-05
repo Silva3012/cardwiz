@@ -16,13 +16,15 @@ class UserCreditCard {
   int? month;
   int? year;
   int? cvv;
+  String? selectedCountry;
 
   // Shorthand initialization using this.
-  UserCreditCard({this.type, this.number, this.name, this.month, this.year, this.cvv});
+  UserCreditCard({this.type, this.number, this.name, this.month, this.year, this.cvv, this.selectedCountry});
 
   @override
   String toString() {
-    return "[Type: $type, Number: $number, Name: $name, Month: $month, Year: $year, CVV: $cvv]";
+    return "[Type: $type, Number: $number, Name: $name, Month: $month, Year: $year, CVV: $cvv, Issuing Country: $selectedCountry"
+        "]";
   }
 }
 

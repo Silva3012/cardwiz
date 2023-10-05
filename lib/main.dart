@@ -94,7 +94,7 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
   var numberController = TextEditingController();
   var _autoValidateMode = AutovalidateMode.disabled;
   Future<List<Country>>? futureCountry;
-  var selectedCountry = "";
+  // var selectedCountry = "";
 
   // Initialize the controller and pass a function
   @override
@@ -183,10 +183,10 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
                  return DropdownButtonHideUnderline(
                      child: DropdownButton<String>(
                        hint: const Text("Issuing Country"),
-                       value: selectedCountry.isNotEmpty ? selectedCountry: null,
+                       value: _creditCard.selectedCountry,
                        onChanged: (String? value) {
                          setState(() {
-                           selectedCountry = value!;
+                           _creditCard.selectedCountry = value;
                          });
                        },
                        items: countries.map((Country country) {
@@ -303,5 +303,9 @@ Platform class
 https://api.flutter.dev/flutter/package-platform_platform/Platform-class.html
 
 API and dropdown
+https://docs.flutter.dev/cookbook/networking/fetch-data
 https://medium.com/@dc.vishwakarma.raj/bind-your-api-to-dropdown-in-flutter-bf7339deeb2
+https://api.flutter.dev/flutter/material/DropdownButton-class.html
+https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html
+
  */
