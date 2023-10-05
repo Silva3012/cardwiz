@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'fomart_input.dart';
+import 'banned_countries_page.dart';
+import 'format_input.dart';
 import 'package:cardwiz/user_credit_card.dart';
 import 'countries.dart';
 
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
     // Base widget of the app
     return MaterialApp(
       title: "CardWiz",
-      // debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark
       ),
@@ -26,12 +27,34 @@ class MyApp extends StatelessWidget {
         // Add the app bar at the top
         appBar: AppBar(
           title: const Text("Card Wiz"),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.list),
-              onPressed: () {
-                // TODO: navigate to a page to configure banned countries (call a function)
+          actions: [
+            Builder(
+              builder: (context) => PopupMenuButton<String>(
+                itemBuilder: (BuildContext context) {
+                  return [
+                    const PopupMenuItem<String>(
+                        value: "banned_countries",
+                        child: Text("Banned Countries"),
+                    ),
+                    const PopupMenuItem<String>(
+                        value: "saved_cards",
+                        child: Text("Saved Cards"),
+                    ),
+                  ];
+                },
+              onSelected: (String value) {
+                  if (value == "banned_countries") {
+                    // TODO: navigate to config page for banned countries
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (BuildContext context) => const BannedCountriesPage()),
+                    );
+                    print("Banned countries selected");
+                  } else if (value == "saved_cards") {
+                    // TODO: navigate to a page to view saved cards
+                    print("Saved Cards selected");
+                  }
               },
+            ),
             ),
           ],
         ),
@@ -91,12 +114,7 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
               _creditCard.name = value;
             },
             keyboardType: TextInputType.text,
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return "Please enter the name on the Card";
-              }
-              return null;
-            },
+            validator: validateName,
           ),
           // TextFormField for the Card Number input.
           TextFormField(
@@ -137,18 +155,18 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
              future: futureCountry,
              builder: (context, snapshot) {
                if (snapshot.connectionState == ConnectionState.waiting) {
-                 return CircularProgressIndicator(); // Display while data is being fetched
+                 return const CircularProgressIndicator(); // Display while data is being fetched
                } else if (snapshot.hasError) {
                  return Text("Error: ${snapshot.error}");
                } else if (!snapshot.hasData) {
-                 return Text("No data available");
+                 return const Text("No data available");
                } else {
                  final List<Country> countries = snapshot.data!;
 
-                 print("Fetched countries in FutureBuilder: ${countries.map((country) => country.name).join(', ')}"); // Print the fetched data
+
                  return DropdownButtonHideUnderline(
                      child: DropdownButton<String>(
-                       hint: const Text("Issuing Country"),
+                       hint: const Text("Select a country"),
                        value: _creditCard.selectedCountry,
                        onChanged: (String? value) {
                          setState(() {
@@ -196,13 +214,13 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
     );
   }
 
-  @override
+  // @override
   // Clean up the controller once Widget is removed from the Widget tree
-  void dispose() {
-    numberController.removeListener(_getCreditCardTypeFromNumbers);
-    numberController.dispose();
-    super.dispose();
-  }
+  // void dispose() {
+  //   numberController.removeListener(_getCreditCardTypeFromNumbers);
+  //   numberController.dispose();
+  //   super.dispose();
+  // }
 
   // This function uses getCreditCardTypeFromNumbers to determine the card issuer from the number already entered
   void _getCreditCardTypeFromNumbers() {
@@ -218,7 +236,7 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
     final FormState form = _formKey.currentState!;
     if (!form.validate()) {
       setState(() {
-        // _autoValidateMode = AutovalidateMode.always; // Validate on every change
+        _autoValidateMode = AutovalidateMode.always; // Validate on every change
       });
       _showSnackBar("Please fix the errors in red before submitting.");
 

@@ -29,6 +29,12 @@ class UserCreditCard {
 }
 
 // Validation functions
+String? validateName (String? value) {
+  if (value == null || value.isEmpty) {
+    return "Please enter the name on the Card";
+  }
+  return null;
+}
 // Validate card number using the Luhn Algorithm
 String? validateCardNumber(String? value) {
     if (value == null || value.isEmpty) {

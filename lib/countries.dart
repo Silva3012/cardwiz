@@ -5,8 +5,6 @@ import 'package:http/http.dart' as http;
 Future<List<Country>> fetchCountries() async {
   final response = await http.get(Uri.parse("https://restcountries.com/v3.1/all"));
 
-  print('Status code: ${response.statusCode}');
-
   if (response.statusCode == 200) {
     final List<dynamic> jsonData = jsonDecode(response.body);
 
@@ -21,7 +19,6 @@ Future<List<Country>> fetchCountries() async {
     // Sort countries alphabetically
     countries.sort((a, b) => a.name.compareTo(b.name));
 
-    print("Fetched countries: ${countries.map((country) => country.name).join(', ')}"); // Print the fetched data
     return countries;
   } else {
     throw Exception('Failed to load countries');
@@ -42,25 +39,7 @@ class Country {
   }
 }
 
-// A config mechanism to define and update the list of banned countries.
-class Configuration {
-  List<String> bannedCountries = [];
 
-  void addBannedCountry(String country) {
-    bannedCountries.add(country);
-  }
-
-  void removeBannedCountry(String country) {
-    bannedCountries.remove(country);
-  }
-}
-
-Configuration config = Configuration();
-
-// A function that check if a country is banned
-bool isCountryBanned(String issuingCountry) {
-  return config.bannedCountries.contains(issuingCountry);
-}
 
 /*
 Fetching data

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // A custom TextInputFormatter to format credit card numbers
@@ -9,10 +8,7 @@ class CreditCardNumberFormatter extends TextInputFormatter {
   CreditCardNumberFormatter({
     required this.sample,
     required this.separator,
-}) {
-    assert(sample != null);
-    assert(separator != null);
-  }
+});
 
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
@@ -41,7 +37,7 @@ class CardDateFormatter extends TextInputFormatter {
     for (int i = 0; i < newValueString.length; i++) {
       if(newValueString[i] != "/") valueToReturn += newValueString[i];
       var nonZeroIndex = i + 1;
-      final contains = valueToReturn.contains(RegExp(r'\/'));
+      final contains = valueToReturn.contains(RegExp(r'/'));
       if (nonZeroIndex % 2 == 0 && nonZeroIndex != newValueString.length && !(contains)) {
         valueToReturn += '/';
       }
@@ -61,7 +57,7 @@ https://api.flutter.dev/flutter/services/TextInputFormatter-class.html
 https://appvesto.medium.com/flutter-formatting-textfield-with-textinputformatter-c73ee2167514
 https://stackoverflow.com/questions/67307908/flutter-expiry-date-text-field
 
-formartEditUpdate method
+formatEditUpdate method
 https://api.flutter.dev/flutter/services/LengthLimitingTextInputFormatter/formatEditUpdate.html
 
 About assert
