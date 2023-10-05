@@ -8,6 +8,44 @@ import 'fomart_input.dart';
 import 'package:cardwiz/user_credit_card.dart';
 import 'package:http/http.dart' as http;
 
+// Network request
+Future<List<Country>> fetchCountries() async {
+  final response = await http.get(Uri.parse("https://restcountries.com/v3.1/all"));
+
+  print('Status code: ${response.statusCode}');
+
+  if (response.statusCode == 200) {
+    final List<dynamic> jsonData = jsonDecode(response.body);
+
+    // List of Country objects
+    final List<Country> countries = jsonData.map((json) {
+      return Country(
+        name: json['name']['common'],
+        code: json["cca2"],
+      );
+    }).toList();
+
+    print("Fetched countries: ${countries.map((country) => country.name).join(', ')}"); // Print the fetched data
+    return countries;
+  } else {
+    throw Exception('Failed to load countries');
+  }
+}
+// Class to represent country data
+class Country {
+  final String name;
+  final String code;
+
+  const Country({required this.name, required this.code});
+
+  factory Country.fromJson(Map<String, dynamic> json) {
+    return Country(
+      name: json['name'],
+      code: json['cca2'],
+    );
+  }
+}
+
 // Starting point of the app
 void main() => runApp(const MyApp());
 
@@ -39,13 +77,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Class to represent country data
-class Country {
-  final String name;
-  final String code;
 
-  Country({required this.name, required this.code});
-}
 
 // CreditCardDetailsForm will be a StatefulWidget, so that it can maintain state
 class CreditCardDetailsForm extends StatefulWidget {
@@ -61,20 +93,16 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
   final _creditCard = UserCreditCard();
   var numberController = TextEditingController();
   var _autoValidateMode = AutovalidateMode.disabled;
-
-  // Issuing country
-  List<Country>  countries = [];
-  String selectedCountry = "";
-
-
+  Future<List<Country>>? futureCountry;
+  var selectedCountry = "";
 
   // Initialize the controller and pass a function
-  void initialState() {
+  @override
+  void initState() {
     super.initState();
-    fetchCountries();
     _creditCard.type = CardType.Others;
     numberController.addListener(_getCreditCardTypeFromNumbers);
-
+    futureCountry = fetchCountries();
   }
 
   @override
@@ -139,30 +167,39 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
               }
           ),
           // TODO: Issuing country will change to a dropdown of pre-populated countries from an API
-          DropdownButtonFormField<String>(
-            value: selectedCountry,
-            onChanged: (value) {
-              setState(() {
-                selectedCountry = value!;
-              });
-            },
-            items: countries.map((Country country) {
-              return DropdownMenuItem<String>(
-                value: country.code,
-                child: Text(country.name),
-              );
-            }).toList(),
-            decoration: const InputDecoration(
-              labelText: "Country",
-              hintText: "Select Country",
-            ),
-            // validator: (String? value) {
-            //   if (value == null || value.isEmpty) {
-            //     return "Please select your country";
-            //   }
-            //   return null;
-            // },
-          ),
+         FutureBuilder<List<Country>>(
+             future: futureCountry,
+             builder: (context, snapshot) {
+               if (snapshot.connectionState == ConnectionState.waiting) {
+                 return CircularProgressIndicator(); // Display while data is being fetched
+               } else if (snapshot.hasError) {
+                 return Text("Error: ${snapshot.error}");
+               } else if (!snapshot.hasData) {
+                 return Text("No data available");
+               } else {
+                 final List<Country> countries = snapshot.data!;
+
+                 print("Fetched countries in FutureBuilder: ${countries.map((country) => country.name).join(', ')}"); // Print the fetched data
+                 return DropdownButtonHideUnderline(
+                     child: DropdownButton<String>(
+                       hint: const Text("Issuing Country"),
+                       value: selectedCountry.isNotEmpty ? selectedCountry: null,
+                       onChanged: (String? value) {
+                         setState(() {
+                           selectedCountry = value!;
+                         });
+                       },
+                       items: countries.map((Country country) {
+                         return DropdownMenuItem<String>(
+                            value: country.code,
+                            child: Text(country.name),
+                         );
+                     }).toList(),
+                     ),
+                 );
+               }
+             }
+         ),
 
           // TextFormField for the Expiry Date.
           TextFormField(
@@ -234,31 +271,6 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
       duration: const Duration(seconds: 3),
     ));
   }
-
-  // Fetch countries function
-  void fetchCountries() async {
-    const String apiUrl = "https://restcountries.com/v3.1/all";
-
-    final response = await http.get(apiUrl as Uri);
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      final List<Country> fetchedCountries = data.map((item) {
-        return Country(
-          name: item['name']['common'],
-          code: item['cca2'],
-        );
-      }).toList();
-
-      setState(() {
-        countries = fetchedCountries;
-      });
-      print("Fetched countries: ${countries.map((country) => country.name).join(', ')}");
-    } else {
-      print("HTTP Error: ${response.statusCode}");
-    }
-  }
-
 
   Widget _submitButton() {
     if (Platform.isIOS) {
