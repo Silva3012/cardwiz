@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'countries.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Banned countries as a StatefulWidget
 class BannedCountriesPage extends StatefulWidget {
@@ -21,19 +22,32 @@ class _BannedCountriesPageState extends State<BannedCountriesPage>{
         countries = fetchedCountries;
       });
     });
+    loadBannedCountries();
   }
-  // Add to banned list
-  void addCountyToBannedList(Country country) {
+
+  Future<void> loadBannedCountries() async {
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      bannedCountries.add(country.name);
+      bannedCountries = prefs.getStringList("bannedCountries") ?? [];
     });
   }
 
+  // Add to banned list
+  void addCountyToBannedList(Country country) async {
+    setState(() {
+      bannedCountries.add(country.name);
+    });
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList("bannedCountries", bannedCountries);
+  }
+
   // Remove from banned list
-  void removeCountryFromBannedList(Country country) {
+  void removeCountryFromBannedList(Country country) async {
     setState(() {
       bannedCountries.remove(country.name);
     });
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList("bannedCountries", bannedCountries);
   }
 
   @override
@@ -88,3 +102,10 @@ class _BannedCountriesPageState extends State<BannedCountriesPage>{
   }
 
 }
+
+/*
+Storing with shared_preferences
+https://stackoverflow.com/questions/62657223/how-to-save-listliststring-with-sharedpreferences-in-flutter
+
+https://blog.logrocket.com/using-sharedpreferences-in-flutter-to-store-data-locally/
+ */
