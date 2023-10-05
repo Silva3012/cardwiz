@@ -25,6 +25,9 @@ Future<List<Country>> fetchCountries() async {
       );
     }).toList();
 
+    // Sort countries alphabetically
+    countries.sort((a, b) => a.name.compareTo(b.name));
+
     print("Fetched countries: ${countries.map((country) => country.name).join(', ')}"); // Print the fetched data
     return countries;
   } else {
@@ -301,6 +304,9 @@ https://stackoverflow.com/questions/59558604/why-do-we-use-the-dispose-method-in
 
 Platform class
 https://api.flutter.dev/flutter/package-platform_platform/Platform-class.html
+
+Sorting
+https://stackoverflow.com/questions/49675055/sort-list-by-alphabetical-order
 
 API and dropdown
 https://docs.flutter.dev/cookbook/networking/fetch-data
