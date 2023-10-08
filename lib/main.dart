@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'banned_countries_page.dart';
+import 'database_helper.dart';
 import 'format_input.dart';
 import 'package:cardwiz/user_credit_card.dart';
 import 'countries.dart';
@@ -233,7 +234,7 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
   }
 
   // This function will be called when the submit button has been pressed to validate inputs
-  void _validateCardInformation() {
+  Future<void> _validateCardInformation() async {
     final FormState form = _formKey.currentState!;
     if (!form.validate()) {
       setState(() {
@@ -247,10 +248,24 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
     }
     else {
       form.save();
-      // TODO on local storage
-      _showSnackBar("Credit has been validated");
-      // Log the credit card class
-      print("Credit Card Details: $_creditCard");
+      UserCreditCard userCreditCard = UserCreditCard(
+        type: _creditCard.type,
+        number: _creditCard.number,
+        name: _creditCard.name,
+        month: _creditCard.month,
+        year: _creditCard.year,
+        cvv: _creditCard.cvv,
+        selectedCountry: _creditCard.selectedCountry,
+      );
+
+      // Check if the card already exist in the DB
+      bool isDuplicateCard = await DatabaseHelper().checkDuplicateCard(userCreditCard);
+      if (isDuplicateCard) {
+        _showSnackBar("This card is already stored");
+      } else {
+        await DatabaseHelper().insertCreditCard(userCreditCard);
+        _showSnackBar("Credit card has been validated");
+      }
     }
   }
 

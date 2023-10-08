@@ -10,6 +10,7 @@ enum CardType {
 
 // A class that will hold the credit card fields
 class UserCreditCard {
+  int? id;
   CardType? type;
   String? number;
   String? name;
@@ -19,11 +20,39 @@ class UserCreditCard {
   String? selectedCountry;
 
   // Shorthand initialization using this.
-  UserCreditCard({this.type, this.number, this.name, this.month, this.year, this.cvv, this.selectedCountry});
+  UserCreditCard({this.id, this.type, this.number, this.name, this.month, this.year, this.cvv, this.selectedCountry});
+
+  // Converting to a map before storing in the SQLite DB
+  Map<String, dynamic> toMap() {
+    return {
+      "id": id,
+      "type": type?.toString(),
+      "number": number,
+      "name": name,
+      "month": month,
+      "year": year,
+      "cvv": cvv,
+      "selectedCountry": selectedCountry,
+    };
+  }
+
+  // Create a UserCreditCard from a map retrieved from the DB
+  factory UserCreditCard.fromMap(Map<String, dynamic> map) {
+    return UserCreditCard(
+      id: map["id"],
+      type: map["type"] != null ? CardType.values.firstWhere((e) => e.toString() == map["type"]) : null,
+      number: map["number"],
+      name: map["name"],
+      month: map["month"],
+      year: map["year"],
+      cvv: map["cvv"],
+      selectedCountry: map["selectedCountry"],
+    );
+  }
 
   @override
   String toString() {
-    return "[Type: $type, Number: $number, Name: $name, Month: $month, Year: $year, CVV: $cvv, Issuing Country: $selectedCountry"
+    return "[ID: $id, Type: $type, Number: $number, Name: $name, Month: $month, Year: $year, CVV: $cvv, Issuing Country: $selectedCountry"
         "]";
   }
 }
@@ -224,4 +253,7 @@ https://en.wikipedia.org/wiki/Payment_card_number#cite_note-mastercard-rules-16
 
 startsWith method
 https://api.flutter.dev/flutter/dart-core/String/startsWith.html
+
+Persisting data with SQLite
+https://docs.flutter.dev/cookbook/persistence/sqlite
  */
