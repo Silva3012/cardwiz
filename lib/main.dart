@@ -176,7 +176,7 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
                        },
                        items: countries.map((Country country) {
                          return DropdownMenuItem<String>(
-                            value: country.code,
+                            value: country.name,
                             child: Text(country.name),
                          );
                      }).toList(),
@@ -241,7 +241,11 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
       });
       _showSnackBar("Please fix the errors in red before submitting.");
 
-    } else {
+    } else if (isCountryBanned(_creditCard.selectedCountry!)) {
+      _showSnackBar("Sorry, the selected country is banned");
+      return;
+    }
+    else {
       form.save();
       // TODO on local storage
       _showSnackBar("Credit has been validated");
