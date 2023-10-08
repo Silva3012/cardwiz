@@ -8,6 +8,7 @@ import 'database_helper.dart';
 import 'format_input.dart';
 import 'package:cardwiz/user_credit_card.dart';
 import 'countries.dart';
+import 'scan_credit_card.dart';
 
 
 // Starting point of the app
@@ -87,7 +88,6 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
   var numberController = TextEditingController();
   var _autoValidateMode = AutovalidateMode.disabled;
   Future<List<Country>>? futureCountry;
-  // var selectedCountry = "";
 
   // Initialize the controller and pass a function
   @override
@@ -211,10 +211,17 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
           // Validate Button
           Container(
             alignment: Alignment.center,
-            child: _submitButton(),
+            child: Column(
+              children: [
+                _scanCardButton(),
+                _submitButton(),
+              ],
+            )
           )
         ],
+
       )
+
     );
   }
 
@@ -291,6 +298,40 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
   }
 
 }
+
+   Widget _scanCardButton() {
+     if (Platform.isIOS) {
+       return CupertinoButton(
+           onPressed: () async {
+             await scanCard();
+             print("Scan card pressed");
+           },
+           child: const Row (
+             mainAxisSize: MainAxisSize.min,
+             children: [
+               Icon(Icons.camera_alt),
+               SizedBox(width: 8),
+               Text("Scan Card"),
+             ],
+           ),
+       );
+     } else {
+       return ElevatedButton(
+           onPressed: () async {
+             await scanCard();
+             print("Scan card pressed");
+           },
+           child: const Row (
+             mainAxisSize: MainAxisSize.min,
+             children: [
+               Icon(Icons.camera_alt),
+               SizedBox(width: 8),
+               Text("Scan Card"),
+             ],
+           ),
+       );
+     }
+  }
 
 
 

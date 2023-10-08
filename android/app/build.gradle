@@ -26,6 +26,8 @@ android {
     namespace "com.example.cardwiz"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
+    compileSdkVersion 31
+    minSdkVersion 21
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
