@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cardwiz/saved_cards_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -50,10 +51,11 @@ class MyApp extends StatelessWidget {
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (BuildContext context) => const BannedCountriesPage()),
                     );
-                    print("Banned countries selected");
                   } else if (value == "saved_cards") {
                     // TODO: navigate to a page to view saved cards
-                    print("Saved Cards selected");
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (BuildContext context) => const SavedCardsPage()),
+                    );
                   }
               },
             ),
