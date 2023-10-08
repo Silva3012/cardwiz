@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
+import 'database_helper.dart';
 import 'user_credit_card.dart';
 import 'package:path/path.dart';
 
@@ -12,6 +13,7 @@ class SavedCardsPage extends StatefulWidget {
 
 class _SavedCardsPageState extends State<SavedCardsPage> {
   List<UserCreditCard> savedCards = [];
+  DatabaseHelper databaseHelper = DatabaseHelper();
 
   @override
   void initState() {
@@ -31,6 +33,12 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
     });
   }
 
+  Future<void> deleteCreditCard(int? id) async {
+    await databaseHelper.deleteCreditCard(id!);
+    // Add any additional logic or UI updates after deleting the record
+    fetchSavedCards(); // Refresh the saved cards list after deletion
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,8 +51,21 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
           final UserCreditCard card = savedCards[index];
           return ListTile(
             title: Text(card.name ?? ""),
-            subtitle: Text(card.number ?? ""),
-            trailing: Text('Expiry: ${card.month}/${card.year}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(card.number ?? ""),
+                Text('Card Type: ${card.type?.toString().split('.').last ?? ''}'),
+                Text('Expiry: ${card.month}/${card.year}'),
+              ],
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () {
+                // Call the deleteCreditCard method here
+                deleteCreditCard(card.id);
+              },
+            ),
             leading: const Icon(Icons.credit_card),
           );
         },

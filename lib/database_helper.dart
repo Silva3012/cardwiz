@@ -49,7 +49,6 @@ class DatabaseHelper {
   Future<void> insertCreditCard(UserCreditCard creditCard) async {
     final Database db = await database;
     await db.insert("credit_cards", creditCard.toMap());
-    print('Credit card inserted: $creditCard');
   }
 
   // Read all credit card records from the database
@@ -59,8 +58,17 @@ class DatabaseHelper {
     final List<UserCreditCard> creditCards = List.generate(maps.length, (index) {
       return UserCreditCard.fromMap(maps[index]);
     });
-    print('Retrieved credit cards: $creditCards');
     return creditCards;
+  }
+
+  // Delete a credit card record from the database
+  Future<void> deleteCreditCard(int id) async {
+    final Database db = await database;
+    await db.delete(
+      "credit_cards",
+      where: "id = ?",
+      whereArgs: [id],
+    );
   }
 
   // Checking the DB if the card already exist

@@ -86,6 +86,9 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
   final _formKey = GlobalKey<FormState>();
   final _creditCard = UserCreditCard();
   var numberController = TextEditingController();
+  var nameController = TextEditingController();
+  var expiryController = TextEditingController();
+  var cvvController = TextEditingController();
   var _autoValidateMode = AutovalidateMode.disabled;
   Future<List<Country>>? futureCountry;
 
@@ -117,10 +120,12 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
             onSaved: (String? value) {
               _creditCard.name = value;
             },
+            controller: nameController,
             keyboardType: TextInputType.text,
             validator: validateName,
           ),
           // TextFormField for the Card Number input.
+
           TextFormField(
             decoration: const InputDecoration(
                 labelText: "Card Number",
@@ -136,8 +141,6 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
             validator: validateCardNumber,
             keyboardType: TextInputType.number,
             onSaved: (String? value) {
-              print("onSaved = $value");
-              print("Num controller has = ${numberController.text}");
               _creditCard.number = cleanedNumber(value!);
             },
 
@@ -148,6 +151,7 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
                 labelText: "CVV",
                 hintText: "CVV",
             ),
+            controller: cvvController,
             keyboardType: TextInputType.number,
             validator: validateCVV,
               onSaved: (value) {
@@ -200,6 +204,7 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
               LengthLimitingTextInputFormatter(4),
               CardDateFormatter()
             ],
+            controller: expiryController,
             keyboardType: TextInputType.number,
             validator: validateExpiryDate,
             onSaved: (value) {
@@ -274,6 +279,16 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
       } else {
         await DatabaseHelper().insertCreditCard(userCreditCard);
         _showSnackBar("Credit card has been validated");
+
+        // Clear the form fields after successful validation
+        numberController.clear();
+        nameController.clear();
+        expiryController.clear();
+        cvvController.clear();
+        // Clear the input fields upon successful validation
+        setState(() {
+          _creditCard.selectedCountry = null;
+        });
       }
     }
   }
@@ -303,8 +318,8 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
      if (Platform.isIOS) {
        return CupertinoButton(
            onPressed: () async {
-             await scanCard();
-             print("Scan card pressed");
+             // await scanCard();
+             print("Scan Card pressed");
            },
            child: const Row (
              mainAxisSize: MainAxisSize.min,
@@ -318,7 +333,7 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
      } else {
        return ElevatedButton(
            onPressed: () async {
-             await scanCard();
+             // await scanCard();
              print("Scan card pressed");
            },
            child: const Row (

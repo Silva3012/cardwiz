@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'countries.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'user_credit_card.dart';
 
 // Banned countries as a StatefulWidget
 class BannedCountriesPage extends StatefulWidget {
@@ -18,7 +17,6 @@ bool isCountryBanned(String country) {
 
 class _BannedCountriesPageState extends State<BannedCountriesPage>{
   List<Country> countries = [];
-  final _creditCard = UserCreditCard();
 
   @override
   void initState() {
@@ -80,7 +78,6 @@ class _BannedCountriesPageState extends State<BannedCountriesPage>{
                     removeCountryFromBannedList(selectedCountry);
                   } else {
                     addCountyToBannedList(selectedCountry);
-                    print("Selected country = $selectedCountry");
                   }
                 }
               },

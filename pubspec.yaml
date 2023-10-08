@@ -38,7 +38,7 @@ dependencies:
   http: ^1.1.0
   shared_preferences: ^2.2.1
   sqflite: ^2.3.0
-  ml_card_scanner: ^0.0.5
+#  ml_card_scanner: ^0.0.5
 
 dev_dependencies:
   flutter_test:
