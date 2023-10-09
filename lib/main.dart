@@ -230,13 +230,13 @@ class _CreditCardDetailsFormState extends State<CreditCardDetailsForm> {
     );
   }
 
-  // @override
+  @override
   // Clean up the controller once Widget is removed from the Widget tree
-  // void dispose() {
-  //   numberController.removeListener(_getCreditCardTypeFromNumbers);
-  //   numberController.dispose();
-  //   super.dispose();
-  // }
+  void dispose() {
+    numberController.removeListener(_getCreditCardTypeFromNumbers);
+    // numberController.dispose();
+    super.dispose();
+  }
 
   // This function uses getCreditCardTypeFromNumbers to determine the card issuer from the number already entered
   void _getCreditCardTypeFromNumbers() {
