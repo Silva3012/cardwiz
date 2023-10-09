@@ -33,10 +33,11 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
     });
   }
 
+  // Delete credit card details
   Future<void> deleteCreditCard(int? id) async {
     await databaseHelper.deleteCreditCard(id!);
-    // Add any additional logic or UI updates after deleting the record
-    fetchSavedCards(); // Refresh the saved cards list after deletion
+
+    fetchSavedCards();
   }
 
   @override
@@ -62,7 +63,6 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
             trailing: IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () {
-                // Call the deleteCreditCard method here
                 deleteCreditCard(card.id);
               },
             ),
