@@ -54,7 +54,7 @@ class _SavedCardsPageState extends State<SavedCardsPage> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(card.number ?? ""),
+                Text(UserCreditCard.redactCardNumber(card.number) ?? ""),
                 Text('Card Type: ${card.type?.toString().split('.').last ?? ''}'),
                 Text('Expiry: ${card.month}/${card.year}'),
               ],

@@ -51,6 +51,14 @@ class UserCreditCard {
     );
   }
 
+  // Redact the card number
+  static String redactCardNumber(String? cardNumber) {
+    if (cardNumber == null || cardNumber.length < 4) {
+      return cardNumber ?? '';
+    }
+    return cardNumber.replaceRange(0, cardNumber.length - 4, "**** **** **** ");
+  }
+
   @override
   String toString() {
     return "[ID: $id, Type: $type, Number: $number, Name: $name, Month: $month, Year: $year, CVV: $cvv, Issuing Country: $selectedCountry"
@@ -249,4 +257,7 @@ https://api.flutter.dev/flutter/dart-core/String/startsWith.html
 
 Persisting data with SQLite
 https://docs.flutter.dev/cookbook/persistence/sqlite
+
+Replace Range
+https://api.flutter.dev/flutter/dart-core/List/replaceRange.html#:~:text=replaceRange%20abstract%20method,-void%20replaceRange(&text=Removes%20the%20objects%20in%20the,elements%20of%20replacements%20at%20start%20.&text=The%20provided%20range%2C%20given%20by,end%20%3D%3D%20start%20)%20is%20valid.
  */
